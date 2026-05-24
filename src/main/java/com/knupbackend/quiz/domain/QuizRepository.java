@@ -1,7 +1,6 @@
-package com.knupbackend.quiz.repository;
+package com.knupbackend.quiz.domain;
 
-import com.knupbackend.quiz.entity.Quiz;
-import com.knupbackend.user.entity.User;
+import com.knupbackend.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

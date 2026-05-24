@@ -1,6 +1,6 @@
 package com.knupbackend.quiz.dto.response;
 
-import com.knupbackend.quiz.entity.Quiz;
+import com.knupbackend.quiz.domain.Quiz;
 import lombok.Builder;
 import lombok.Getter;
 

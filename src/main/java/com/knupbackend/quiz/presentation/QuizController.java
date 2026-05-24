@@ -1,4 +1,4 @@
-package com.knupbackend.quiz.controller;
+package com.knupbackend.quiz.presentation;
 
 import com.knupbackend.global.auth.LoginUser;
 import com.knupbackend.global.response.PageResponse;
@@ -6,7 +6,7 @@ import com.knupbackend.quiz.dto.request.QuizCreateRequest;
 import com.knupbackend.quiz.dto.response.QuizDetailResponse;
 import com.knupbackend.quiz.dto.response.QuizSummaryResponse;
 import com.knupbackend.quiz.service.QuizService;
-import com.knupbackend.user.entity.User;
+import com.knupbackend.user.domain.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

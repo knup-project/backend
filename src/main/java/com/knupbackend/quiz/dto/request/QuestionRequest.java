@@ -1,6 +1,6 @@
 package com.knupbackend.quiz.dto.request;
 
-import com.knupbackend.quiz.entity.QuestionType;
+import com.knupbackend.quiz.domain.QuestionType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

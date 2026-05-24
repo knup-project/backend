@@ -1,4 +1,4 @@
-package com.knupbackend.quiz.entity;
+package com.knupbackend.quiz.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -37,7 +37,7 @@ public class Question {
     private List<String> options = new ArrayList<>();
 
     private String correctAnswer;
-    private Integer timeLimit;   // 초
+    private Integer timeLimit;
     private Integer points;
 
     @Column(nullable = false)

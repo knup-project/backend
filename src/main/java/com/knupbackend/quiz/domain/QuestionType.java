@@ -1,4 +1,4 @@
-package com.knupbackend.quiz.entity;
+package com.knupbackend.quiz.domain;
 
 public enum QuestionType {
     MULTIPLE_CHOICE,

@@ -1,7 +1,7 @@
 package com.knupbackend.global.auth;
 
-import com.knupbackend.user.entity.User;
-import com.knupbackend.user.repository.UserRepository;
+import com.knupbackend.user.domain.User;
+import com.knupbackend.user.domain.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;

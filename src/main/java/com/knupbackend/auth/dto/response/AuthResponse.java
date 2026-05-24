@@ -1,6 +1,6 @@
 package com.knupbackend.auth.dto.response;
 
-import com.knupbackend.user.entity.User;
+import com.knupbackend.user.domain.User;
 import lombok.Builder;
 import lombok.Getter;
 

@@ -1,6 +1,6 @@
-package com.knupbackend.quiz.entity;
+package com.knupbackend.quiz.domain;
 
-import com.knupbackend.user.entity.User;
+import com.knupbackend.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 

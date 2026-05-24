@@ -1,4 +1,4 @@
-package com.knupbackend.auth.controller;
+package com.knupbackend.auth.presentation;
 
 import com.knupbackend.auth.dto.request.LoginRequest;
 import com.knupbackend.auth.dto.request.SignUpRequest;

@@ -1,4 +1,4 @@
-package com.knupbackend.user.entity;
+package com.knupbackend.user.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
