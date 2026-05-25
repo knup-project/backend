@@ -4,29 +4,24 @@ import com.knupbackend.quiz.domain.QuestionType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class QuestionRequest {
+public record QuestionRequest(
 
-    @NotBlank(message = "문제 내용은 필수입니다.")
-    private String content;
+        @NotBlank(message = "문제 내용은 필수입니다.")
+        String content,
 
-    @NotNull(message = "문제 유형은 필수입니다.")
-    private QuestionType questionType;
+        @NotNull(message = "문제 유형은 필수입니다.")
+        QuestionType questionType,
 
-    private List<String> options;
-    private String correctAnswer;
+        List<String> options,
 
-    @Min(value = 5, message = "제한 시간은 최소 5초 이상이어야 합니다.")
-    private Integer timeLimit;
+        String correctAnswer,
 
-    @Min(value = 1, message = "점수는 최소 1점 이상이어야 합니다.")
-    private Integer points;
-}
+        @Min(value = 5, message = "제한 시간은 최소 5초 이상이어야 합니다.")
+        Integer timeLimit,
+
+        @Min(value = 1, message = "점수는 최소 1점 이상이어야 합니다.")
+        Integer points
+) {}

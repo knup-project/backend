@@ -54,8 +54,8 @@ class AuthServiceTest {
     void signUp_success_savesUser() {
         AuthResponse result = authService.signUp(signUpRequest("test@test.com"), request);
 
-        assertThat(result.getEmail()).isEqualTo("test@test.com");
-        assertThat(result.getNickname()).isEqualTo("테스터");
+        assertThat(result.email()).isEqualTo("test@test.com");
+        assertThat(result.nickname()).isEqualTo("테스터");
         assertThat(userRepository.findByEmail("test@test.com")).isPresent();
     }
 
@@ -100,7 +100,7 @@ class AuthServiceTest {
         MockHttpServletRequest loginReq = new MockHttpServletRequest();
         AuthResponse result = authService.login(loginRequest("test@test.com", "password123"), loginReq);
 
-        assertThat(result.getEmail()).isEqualTo("test@test.com");
+        assertThat(result.email()).isEqualTo("test@test.com");
         assertThat(loginReq.getSession(false).getAttribute(LoginSessionConst.LOGIN_USER_ID)).isNotNull();
     }
 
@@ -115,17 +115,10 @@ class AuthServiceTest {
     }
 
     private SignUpRequest signUpRequest(String email) {
-        SignUpRequest req = new SignUpRequest();
-        req.setEmail(email);
-        req.setPassword("password123");
-        req.setNickname("테스터");
-        return req;
+        return new SignUpRequest(email, "password123", "테스터");
     }
 
     private LoginRequest loginRequest(String email, String password) {
-        LoginRequest req = new LoginRequest();
-        req.setEmail(email);
-        req.setPassword(password);
-        return req;
+        return new LoginRequest(email, password);
     }
 }

@@ -56,9 +56,9 @@ class QuizServiceTest {
     void createQuiz_success() {
         QuizDetailResponse result = quizService.createQuiz(quizCreateRequest(), testUser);
 
-        assertThat(result.getTitle()).isEqualTo("테스트 퀴즈");
-        assertThat(result.getQuestions()).hasSize(1);
-        assertThat(quizRepository.findById(result.getId())).isPresent();
+        assertThat(result.title()).isEqualTo("테스트 퀴즈");
+        assertThat(result.questions()).hasSize(1);
+        assertThat(quizRepository.findById(result.id())).isPresent();
     }
 
     @Test
@@ -71,7 +71,7 @@ class QuizServiceTest {
                 quizService.getMyQuizzes(testUser, 0, 20, "createdAt");
 
         assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent().get(0).getTitle()).isEqualTo("테스트 퀴즈");
+        assertThat(result.getContent().get(0).title()).isEqualTo("테스트 퀴즈");
     }
 
     @Test
@@ -79,10 +79,10 @@ class QuizServiceTest {
     void getQuiz_success() {
         QuizDetailResponse created = quizService.createQuiz(quizCreateRequest(), testUser);
 
-        QuizDetailResponse result = quizService.getQuiz(created.getId(), testUser);
+        QuizDetailResponse result = quizService.getQuiz(created.id(), testUser);
 
-        assertThat(result.getId()).isEqualTo(created.getId());
-        assertThat(result.getTitle()).isEqualTo("테스트 퀴즈");
+        assertThat(result.id()).isEqualTo(created.id());
+        assertThat(result.title()).isEqualTo("테스트 퀴즈");
     }
 
     @Test
@@ -100,12 +100,11 @@ class QuizServiceTest {
     void updateQuiz_success() {
         QuizDetailResponse created = quizService.createQuiz(quizCreateRequest(), testUser);
 
-        QuizCreateRequest updateReq = quizCreateRequest();
-        updateReq.setTitle("수정된 퀴즈");
+        QuizCreateRequest updateReq = new QuizCreateRequest("수정된 퀴즈", quizCreateRequest().description(), quizCreateRequest().questions());
 
-        QuizDetailResponse result = quizService.updateQuiz(created.getId(), updateReq, testUser);
+        QuizDetailResponse result = quizService.updateQuiz(created.id(), updateReq, testUser);
 
-        assertThat(result.getTitle()).isEqualTo("수정된 퀴즈");
+        assertThat(result.title()).isEqualTo("수정된 퀴즈");
     }
 
     @Test
@@ -125,7 +124,7 @@ class QuizServiceTest {
         QuizDetailResponse created = quizService.createQuiz(quizCreateRequest(), testUser);
 
         assertThatThrownBy(() ->
-                quizService.updateQuiz(created.getId(), quizCreateRequest(), otherUser))
+                quizService.updateQuiz(created.id(), quizCreateRequest(), otherUser))
                 .isInstanceOf(KnupException.class)
                 .satisfies(e ->
                         assertThat(((KnupException) e).getErrorCode())
@@ -137,9 +136,9 @@ class QuizServiceTest {
     void deleteQuiz_success() {
         QuizDetailResponse created = quizService.createQuiz(quizCreateRequest(), testUser);
 
-        quizService.deleteQuiz(created.getId(), testUser);
+        quizService.deleteQuiz(created.id(), testUser);
 
-        assertThat(quizRepository.findById(created.getId())).isEmpty();
+        assertThat(quizRepository.findById(created.id())).isEmpty();
     }
 
     @Test
@@ -158,7 +157,7 @@ class QuizServiceTest {
         QuizDetailResponse created = quizService.createQuiz(quizCreateRequest(), testUser);
 
         assertThatThrownBy(() ->
-                quizService.deleteQuiz(created.getId(), otherUser))
+                quizService.deleteQuiz(created.id(), otherUser))
                 .isInstanceOf(KnupException.class)
                 .satisfies(e ->
                         assertThat(((KnupException) e).getErrorCode())
@@ -166,17 +165,7 @@ class QuizServiceTest {
     }
 
     private QuizCreateRequest quizCreateRequest() {
-        QuestionRequest q = new QuestionRequest();
-        q.setContent("1 + 1 = ?");
-        q.setQuestionType(QuestionType.SHORT_ANSWER);
-        q.setCorrectAnswer("2");
-        q.setTimeLimit(30);
-        q.setPoints(10);
-
-        QuizCreateRequest req = new QuizCreateRequest();
-        req.setTitle("테스트 퀴즈");
-        req.setDescription("퀴즈 설명");
-        req.setQuestions(List.of(q));
-        return req;
+        QuestionRequest q = new QuestionRequest("1 + 1 = ?", QuestionType.SHORT_ANSWER, null, "2", 30, 10);
+        return new QuizCreateRequest("테스트 퀴즈", "퀴즈 설명", List.of(q));
     }
 }
