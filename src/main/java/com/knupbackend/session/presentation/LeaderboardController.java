@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sessions/{sessionId}")
+@RequestMapping("/api/v1/sessions/{sessionId}")
 public class LeaderboardController {
 
     private final LeaderboardService leaderboardService;

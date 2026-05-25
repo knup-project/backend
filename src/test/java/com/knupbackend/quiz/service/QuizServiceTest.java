@@ -38,8 +38,6 @@ class QuizServiceTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-
         testUser = userRepository.save(User.builder()
                 .email("test@test.com")
                 .password(passwordEncoder.encode("password123"))

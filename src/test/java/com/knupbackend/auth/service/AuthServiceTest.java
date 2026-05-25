@@ -7,6 +7,7 @@ import com.knupbackend.global.auth.LoginSessionConst;
 import com.knupbackend.global.exception.ErrorCode;
 import com.knupbackend.global.exception.KnupException;
 import com.knupbackend.user.domain.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,11 @@ class AuthServiceTest {
     void setUp() {
         userRepository.deleteAll();
         request = new MockHttpServletRequest();
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
     }
 
     @Test
