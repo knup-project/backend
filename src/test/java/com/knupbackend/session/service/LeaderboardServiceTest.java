@@ -160,12 +160,12 @@ class LeaderboardServiceTest {
     void getLeaderboard_sortedByScoreDesc() {
         LeaderboardResponse result = leaderboardService.getLeaderboard("session-001", 2);
 
-        assertThat(result.getSessionId()).isEqualTo("session-001");
-        assertThat(result.getCurrentQuestion()).isEqualTo(5);
-        assertThat(result.getEntries()).hasSize(2);
-        assertThat(result.getEntries().get(0).getRank()).isEqualTo(1);
-        assertThat(result.getEntries().get(0).getNickname()).isEqualTo("민준");   // 5000점
-        assertThat(result.getEntries().get(1).getNickname()).isEqualTo("상민");   // 4750점
+        assertThat(result.sessionId()).isEqualTo("session-001");
+        assertThat(result.currentQuestion()).isEqualTo(5);
+        assertThat(result.entries()).hasSize(2);
+        assertThat(result.entries().get(0).rank()).isEqualTo(1);
+        assertThat(result.entries().get(0).nickname()).isEqualTo("민준");   // 5000점
+        assertThat(result.entries().get(1).nickname()).isEqualTo("상민");   // 4750점
     }
 
     @Test
@@ -174,7 +174,7 @@ class LeaderboardServiceTest {
         LeaderboardResponse result = leaderboardService.getLeaderboard("session-001", 10);
 
         // 민준: 15.0 / 5 = 3.0
-        double avgTime = result.getEntries().get(0).getAverageTimeSec();
+        double avgTime = result.entries().get(0).averageTimeSec();
         assertThat(avgTime).isEqualTo(3.0);
     }
 
@@ -195,13 +195,13 @@ class LeaderboardServiceTest {
     void getTeamLeaderboard_sortedByTotalScore() {
         TeamLeaderboardResponse result = leaderboardService.getTeamLeaderboard("session-team-001");
 
-        assertThat(result.getEntries()).hasSize(2);
-        assertThat(result.getEntries().get(0).getRank()).isEqualTo(1);
-        assertThat(result.getEntries().get(0).getTeamName()).isEqualTo("A팀");   // 23500점
-        assertThat(result.getEntries().get(0).getTotalScore()).isEqualTo(23500);
-        assertThat(result.getEntries().get(0).getMemberCount()).isEqualTo(2);
-        assertThat(result.getEntries().get(0).getMembers()).hasSize(2);
-        assertThat(result.getEntries().get(1).getTeamName()).isEqualTo("B팀");   // 15500점
+        assertThat(result.entries()).hasSize(2);
+        assertThat(result.entries().get(0).rank()).isEqualTo(1);
+        assertThat(result.entries().get(0).teamName()).isEqualTo("A팀");   // 23500점
+        assertThat(result.entries().get(0).totalScore()).isEqualTo(23500);
+        assertThat(result.entries().get(0).memberCount()).isEqualTo(2);
+        assertThat(result.entries().get(0).members()).hasSize(2);
+        assertThat(result.entries().get(1).teamName()).isEqualTo("B팀");   // 15500점
     }
 
     @Test
@@ -234,10 +234,10 @@ class LeaderboardServiceTest {
         // totalTime=20.5+30+15=65.5, count=13 → avgTime=65.5/13
         SessionStatsResponse result = leaderboardService.getStats("session-001", host);
 
-        assertThat(result.getTotalParticipants()).isEqualTo(3);
-        assertThat(result.getCurrentQuestionIndex()).isEqualTo(5);
-        assertThat(result.getOverallAccuracy()).isEqualTo(1.0);
-        assertThat(result.getAnsweredCount()).isEqualTo(13);
+        assertThat(result.totalParticipants()).isEqualTo(3);
+        assertThat(result.currentQuestionIndex()).isEqualTo(5);
+        assertThat(result.overallAccuracy()).isEqualTo(1.0);
+        assertThat(result.answeredCount()).isEqualTo(13);
     }
 
     @Test

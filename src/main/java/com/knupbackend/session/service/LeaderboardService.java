@@ -29,7 +29,7 @@ public class LeaderboardService {
         GameSession session = findSession(sessionId);
         List<Participant> sorted =
                 participantRepository.findBySessionOrderByScoreDesc(session);
-        return new LeaderboardResponse(session, sorted, top);
+        return LeaderboardResponse.of(session, sorted, top);
     }
 
     /** 5.2 팀 리더보드 */
@@ -39,7 +39,7 @@ public class LeaderboardService {
             throw new KnupException(ErrorCode.NOT_TEAM_MODE);
         }
         List<Participant> participants = participantRepository.findBySession(session);
-        return new TeamLeaderboardResponse(participants);
+        return TeamLeaderboardResponse.of(participants);
     }
 
     /** 5.3 실시간 통계 (호스트 전용) */
@@ -60,7 +60,7 @@ public class LeaderboardService {
                         Integer::sum
                 ));
 
-        return new SessionStatsResponse(session, participants, distribution);
+        return SessionStatsResponse.of(session, participants, distribution);
     }
 
     // ── private ──────────────────────────────────────────────────

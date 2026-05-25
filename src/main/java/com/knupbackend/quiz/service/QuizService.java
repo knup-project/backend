@@ -31,8 +31,8 @@ public class QuizService {
     @Transactional
     public QuizDetailResponse createQuiz(QuizCreateRequest request, User user) {
         Quiz quiz = Quiz.builder()
-                .title(request.getTitle())
-                .description(request.getDescription())
+                .title(request.title())
+                .description(request.description())
                 .user(user)
                 .build();
 
@@ -60,7 +60,7 @@ public class QuizService {
         Quiz quiz = findById(quizId);
         checkOwnership(quiz, user);
 
-        quiz.update(request.getTitle(), request.getDescription());
+        quiz.update(request.title(), request.description());
         quiz.updateQuestions(buildQuestions(request, quiz));
         return QuizDetailResponse.from(quiz);
     }
@@ -87,19 +87,19 @@ public class QuizService {
     }
 
     private List<Question> buildQuestions(QuizCreateRequest request, Quiz quiz) {
-        if (request.getQuestions() == null) return new ArrayList<>();
+        if (request.questions() == null) return new ArrayList<>();
 
-        return IntStream.range(0, request.getQuestions().size())
+        return IntStream.range(0, request.questions().size())
                 .mapToObj(i -> {
-                    var q = request.getQuestions().get(i);
+                    var q = request.questions().get(i);
                     return Question.builder()
                             .quiz(quiz)
-                            .content(q.getContent())
-                            .questionType(q.getQuestionType())
-                            .options(q.getOptions() != null ? q.getOptions() : new ArrayList<>())
-                            .correctAnswer(q.getCorrectAnswer())
-                            .timeLimit(q.getTimeLimit())
-                            .points(q.getPoints())
+                            .content(q.content())
+                            .questionType(q.questionType())
+                            .options(q.options() != null ? q.options() : new ArrayList<>())
+                            .correctAnswer(q.correctAnswer())
+                            .timeLimit(q.timeLimit())
+                            .points(q.points())
                             .orderIndex(i)
                             .build();
                 })

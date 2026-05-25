@@ -25,14 +25,14 @@ public class AuthService {
     /** 회원가입 + 자동 로그인 */
     @Transactional
     public AuthResponse signUp(SignUpRequest request, HttpServletRequest httpRequest) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new KnupException(ErrorCode.EMAIL_DUPLICATE);
         }
 
         User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .nickname(request.getNickname())
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .nickname(request.nickname())
                 .build();
 
         User saved = userRepository.save(user);
@@ -43,10 +43,10 @@ public class AuthService {
     /** 로그인 → 세션에 userId 저장 */
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request, HttpServletRequest httpRequest) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new KnupException(ErrorCode.AUTHENTICATION_FAILED));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new KnupException(ErrorCode.AUTHENTICATION_FAILED);
         }
 

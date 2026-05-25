@@ -2,34 +2,29 @@ package com.knupbackend.quiz.dto.response;
 
 import com.knupbackend.quiz.domain.Question;
 import com.knupbackend.quiz.domain.QuestionType;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.util.List;
 
-@Getter
-@Builder
-public class QuestionResponse {
-
-    private Long id;
-    private String content;
-    private QuestionType questionType;
-    private List<String> options;
-    private String correctAnswer;
-    private Integer timeLimit;
-    private Integer points;
-    private Integer orderIndex;
-
+public record QuestionResponse(
+        Long id,
+        String content,
+        QuestionType questionType,
+        List<String> options,
+        String correctAnswer,
+        Integer timeLimit,
+        Integer points,
+        Integer orderIndex
+) {
     public static QuestionResponse from(Question q) {
-        return QuestionResponse.builder()
-                .id(q.getId())
-                .content(q.getContent())
-                .questionType(q.getQuestionType())
-                .options(q.getOptions())
-                .correctAnswer(q.getCorrectAnswer())
-                .timeLimit(q.getTimeLimit())
-                .points(q.getPoints())
-                .orderIndex(q.getOrderIndex())
-                .build();
+        return new QuestionResponse(
+                q.getId(),
+                q.getContent(),
+                q.getQuestionType(),
+                q.getOptions(),
+                q.getCorrectAnswer(),
+                q.getTimeLimit(),
+                q.getPoints(),
+                q.getOrderIndex()
+        );
     }
 }

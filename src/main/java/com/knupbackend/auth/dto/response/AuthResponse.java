@@ -1,26 +1,21 @@
 package com.knupbackend.auth.dto.response;
 
 import com.knupbackend.user.domain.User;
-import lombok.Builder;
-import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Builder
-public class AuthResponse {
-
-    private Long id;
-    private String email;
-    private String nickname;
-    private LocalDateTime createdAt;
-
+public record AuthResponse(
+        Long id,
+        String email,
+        String nickname,
+        LocalDateTime createdAt
+) {
     public static AuthResponse from(User user) {
-        return AuthResponse.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .nickname(user.getNickname())
-                .createdAt(user.getCreatedAt())
-                .build();
+        return new AuthResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getNickname(),
+                user.getCreatedAt()
+        );
     }
 }
