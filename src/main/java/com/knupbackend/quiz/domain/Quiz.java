@@ -1,10 +1,10 @@
 package com.knupbackend.quiz.domain;
 
+import com.knupbackend.global.common.BaseEntity;
 import com.knupbackend.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Quiz {
+public class Quiz extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,23 +34,6 @@ public class Quiz {
     @OrderBy("orderIndex ASC")
     @Builder.Default
     private List<Question> questions = new ArrayList<>();
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt  = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 
     // ── 도메인 메서드 ──────────────────────────────────────────────
 
