@@ -29,8 +29,8 @@ public class QuizController {
                 .body(quizService.createQuiz(request, user));
     }
 
-    /** GET /api/v1/quizzes — 내 퀴즈 목록 */
-    @GetMapping
+    /** GET /api/v1/quizzes/me — 내 퀴즈 목록 (리터럴 경로라 /{quizId}보다 우선 매칭) */
+    @GetMapping("/me")
     public ResponseEntity<PageResponse<QuizSummaryResponse>> getMyQuizzes(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
