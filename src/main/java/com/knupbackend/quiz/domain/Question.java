@@ -37,6 +37,10 @@ public class Question {
     private List<String> options = new ArrayList<>();
 
     private String correctAnswer;
+
+    @Column(columnDefinition = "TEXT")
+    private String explanation;
+
     private Integer timeLimit;
     private Integer points;
 

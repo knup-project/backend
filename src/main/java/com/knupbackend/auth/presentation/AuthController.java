@@ -4,6 +4,8 @@ import com.knupbackend.auth.dto.request.LoginRequest;
 import com.knupbackend.auth.dto.request.SignUpRequest;
 import com.knupbackend.auth.dto.response.AuthResponse;
 import com.knupbackend.auth.service.AuthService;
+import com.knupbackend.global.auth.LoginUser;
+import com.knupbackend.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +40,11 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletRequest httpRequest) {
         authService.logout(httpRequest);
         return ResponseEntity.noContent().build();
+    }
+
+    /** GET /api/v1/auth/me — 현재 로그인 사용자 (세션 검증용). 미로그인 시 인터셉터가 401 처리. */
+    @GetMapping("/me")
+    public ResponseEntity<AuthResponse> me(@LoginUser User user) {
+        return ResponseEntity.ok(AuthResponse.from(user));
     }
 }

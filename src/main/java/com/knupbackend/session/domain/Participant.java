@@ -47,4 +47,14 @@ public class Participant extends BaseEntity {
         if (answerCount == 0) return 0.0;
         return totalResponseTimeSec / answerCount;
     }
+
+    /** Applies one graded answer to this participant's running totals. */
+    public void recordAnswer(boolean correct, double responseTimeSec, int awardedPoints) {
+        this.score += awardedPoints;
+        if (correct) {
+            this.correctCount++;
+        }
+        this.totalResponseTimeSec += responseTimeSec;
+        this.answerCount++;
+    }
 }

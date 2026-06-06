@@ -9,7 +9,7 @@ public record TeamLeaderboardEntry(
         int rank,
         String teamId,
         String teamName,
-        int totalScore,
+        int totalPoints,
         int memberCount,
         List<LeaderboardEntry> members
 ) {

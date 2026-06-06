@@ -6,9 +6,9 @@ public record LeaderboardEntry(
         int rank,
         String participantId,
         String nickname,
-        int score,
+        int totalPoints,
         int correctCount,
-        double averageTimeSec
+        double averageResponseTimeSec
 ) {
     public static LeaderboardEntry of(int rank, Participant p) {
         return new LeaderboardEntry(

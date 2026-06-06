@@ -8,9 +8,10 @@ import java.util.List;
 public record QuestionResponse(
         Long id,
         String content,
-        QuestionType questionType,
+        QuestionType type,
         List<String> options,
-        String correctAnswer,
+        String answer,
+        String explanation,
         Integer timeLimit,
         Integer points,
         Integer orderIndex
@@ -22,6 +23,7 @@ public record QuestionResponse(
                 q.getQuestionType(),
                 q.getOptions(),
                 q.getCorrectAnswer(),
+                q.getExplanation(),
                 q.getTimeLimit(),
                 q.getPoints(),
                 q.getOrderIndex()
