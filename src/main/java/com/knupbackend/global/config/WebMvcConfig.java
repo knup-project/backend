@@ -34,6 +34,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/api/v1/auth/signup",
                         "/api/v1/auth/login",
                         "/api/v1/sessions/join",
+                        "/api/v1/sessions/*/answer",
                         "/api/v1/sessions/*/leaderboard",
                         "/api/v1/sessions/*/leaderboard/teams"
                 );

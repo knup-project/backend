@@ -64,6 +64,7 @@ class LeaderboardServiceTest {
 
         individualSession = sessionRepository.save(GameSession.builder()
                 .sessionId("session-001")
+                .pin("100001")
                 .quiz(quiz)
                 .mode(SessionMode.INDIVIDUAL)
                 .currentQuestionIndex(5)
@@ -71,6 +72,7 @@ class LeaderboardServiceTest {
 
         teamSession = sessionRepository.save(GameSession.builder()
                 .sessionId("session-team-001")
+                .pin("100002")
                 .quiz(quiz)
                 .mode(SessionMode.TEAM)
                 .currentQuestionIndex(3)
@@ -174,7 +176,7 @@ class LeaderboardServiceTest {
         LeaderboardResponse result = leaderboardService.getLeaderboard("session-001", 10);
 
         // 민준: 15.0 / 5 = 3.0
-        double avgTime = result.entries().get(0).averageTimeSec();
+        double avgTime = result.entries().get(0).averageResponseTimeSec();
         assertThat(avgTime).isEqualTo(3.0);
     }
 
@@ -198,7 +200,7 @@ class LeaderboardServiceTest {
         assertThat(result.entries()).hasSize(2);
         assertThat(result.entries().get(0).rank()).isEqualTo(1);
         assertThat(result.entries().get(0).teamName()).isEqualTo("A팀");   // 23500점
-        assertThat(result.entries().get(0).totalScore()).isEqualTo(23500);
+        assertThat(result.entries().get(0).totalPoints()).isEqualTo(23500);
         assertThat(result.entries().get(0).memberCount()).isEqualTo(2);
         assertThat(result.entries().get(0).members()).hasSize(2);
         assertThat(result.entries().get(1).teamName()).isEqualTo("B팀");   // 15500점

@@ -13,11 +13,13 @@ public record QuestionRequest(
         String content,
 
         @NotNull(message = "문제 유형은 필수입니다.")
-        QuestionType questionType,
+        QuestionType type,
 
         List<String> options,
 
-        String correctAnswer,
+        String answer,
+
+        String explanation,
 
         @Min(value = 5, message = "제한 시간은 최소 5초 이상이어야 합니다.")
         Integer timeLimit,

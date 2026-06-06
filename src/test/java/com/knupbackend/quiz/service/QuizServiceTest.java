@@ -165,7 +165,7 @@ class QuizServiceTest {
     }
 
     private QuizCreateRequest quizCreateRequest() {
-        QuestionRequest q = new QuestionRequest("1 + 1 = ?", QuestionType.SHORT_ANSWER, null, "2", 30, 10);
+        QuestionRequest q = new QuestionRequest("1 + 1 = ?", QuestionType.SHORT_ANSWER, null, "2", null, 30, 10);
         return new QuizCreateRequest("테스트 퀴즈", "퀴즈 설명", List.of(q));
     }
 }
