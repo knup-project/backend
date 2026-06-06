@@ -43,3 +43,22 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to VM
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      # The image is public, so the VM pulls it with no registry auth.
+      # /opt/knup already holds docker-compose.yml + .env on the VM.
+      - name: Roll the stack on the VM over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ubuntu
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /opt/knup
+            docker compose pull
+            docker compose up -d
+            docker image prune -f
