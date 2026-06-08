@@ -3,7 +3,6 @@ package com.knupbackend.session.dto.response;
 import com.knupbackend.session.domain.Participant;
 
 import java.util.List;
-import java.util.UUID;
 
 public record TeamLeaderboardEntry(
         int rank,
@@ -16,7 +15,7 @@ public record TeamLeaderboardEntry(
     public static TeamLeaderboardEntry of(int rank, String teamName, List<Participant> members) {
         return new TeamLeaderboardEntry(
                 rank,
-                UUID.nameUUIDFromBytes(teamName.getBytes()).toString(),
+                teamName,
                 teamName,
                 members.stream().mapToInt(Participant::getScore).sum(),
                 members.size(),
