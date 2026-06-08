@@ -233,6 +233,38 @@ public class SessionService {
         broadcastParticipants(session);
     }
 
+    /** 선택 강퇴(participantIds 지정) 또는 전체 강퇴(빈 목록) */
+    @Transactional
+    public void removeParticipants(String sessionId, List<String> participantIds, User host) {
+        GameSession session = findSession(sessionId);
+        requireHost(session, host);
+
+        List<Participant> all = participantRepository.findBySession(session);
+        List<Participant> targets = (participantIds == null || participantIds.isEmpty())
+                ? all
+                : all.stream().filter(p -> participantIds.contains(p.getParticipantId())).toList();
+
+        for (Participant p : targets) {
+            answerRepository.deleteByParticipant(p);
+            participantRepository.delete(p);
+        }
+        broadcastParticipants(session);
+    }
+
+    // ── 유령 세션 자동 종료 (스케줄러에서 호출) ─────────────────────
+
+    /** 생성 후 3시간이 지난 미종료(WAITING/IN_PROGRESS) 세션을 자동 종료한다. */
+    @Transactional
+    public void expireStaleSessions() {
+        java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusHours(3);
+        List<GameSession> stale = sessionRepository.findByStatusNotAndCreatedAtBefore(SessionStatus.FINISHED, cutoff);
+        for (GameSession s : stale) {
+            s.end();
+            broadcaster.status(new SessionStatusEvent(
+                    s.getSessionId(), SessionStatus.FINISHED, "세션이 만료되어 종료되었습니다."));
+        }
+    }
+
     // ── helpers ───────────────────────────────────────────────────
 
     private GameSession findSession(String sessionId) {
