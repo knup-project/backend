@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.nio.charset.StandardCharsets;
@@ -23,6 +24,12 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
+
+        // CORS preflight(OPTIONS) 요청은 인증 없이 통과시킨다.
+        // 막으면 preflight 가 401 이 되어 브라우저가 본요청을 CORS 로 차단한다.
+        if (CorsUtils.isPreFlightRequest(request)) {
+            return true;
+        }
 
         HttpSession session = request.getSession(false);
 
