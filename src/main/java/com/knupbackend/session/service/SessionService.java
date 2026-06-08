@@ -59,15 +59,21 @@ public class SessionService {
                 .build();
 
         sessionRepository.save(session);
-        return SessionResponse.of(session, quiz.getQuestions().size(), 0);
+        return SessionResponse.of(session, quiz.getQuestions().size(), 0, List.of());
     }
 
     public SessionResponse get(String sessionId) {
         GameSession session = findSession(sessionId);
+        List<Participant> participants = participantRepository.findBySession(session);
+        List<SessionResponse.ParticipantSummary> summaries = participants.stream()
+                .map(p -> new SessionResponse.ParticipantSummary(
+                        p.getParticipantId(), p.getNickname(), p.getTeamName()))
+                .toList();
         return SessionResponse.of(
                 session,
                 session.getQuiz().getQuestions().size(),
-                participantRepository.countBySession(session)
+                participants.size(),
+                summaries
         );
     }
 

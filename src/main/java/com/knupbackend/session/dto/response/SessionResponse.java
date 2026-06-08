@@ -5,9 +5,10 @@ import com.knupbackend.session.domain.SessionMode;
 import com.knupbackend.session.domain.SessionStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record SessionResponse(
-        String id,
+        String sessionId,
         String pin,
         Long quizId,
         String quizTitle,
@@ -17,9 +18,14 @@ public record SessionResponse(
         int totalQuestions,
         Integer maxParticipants,
         int participantCount,
+        List<ParticipantSummary> participants,
         LocalDateTime createdAt
 ) {
-    public static SessionResponse of(GameSession s, int totalQuestions, int participantCount) {
+    /** 대기실 인원 스냅샷 (teamId 는 곧 teamName) */
+    public record ParticipantSummary(String participantId, String nickname, String teamId) {}
+
+    public static SessionResponse of(GameSession s, int totalQuestions, int participantCount,
+                                     List<ParticipantSummary> participants) {
         return new SessionResponse(
                 s.getSessionId(),
                 s.getPin(),
@@ -31,6 +37,7 @@ public record SessionResponse(
                 totalQuestions,
                 s.getMaxParticipants(),
                 participantCount,
+                participants,
                 s.getCreatedAt()
         );
     }
