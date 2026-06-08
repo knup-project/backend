@@ -209,6 +209,24 @@ public class SessionService {
         );
     }
 
+    // ── Host: 참가자 강퇴 ─────────────────────────────────────────
+
+    @Transactional
+    public void removeParticipant(String sessionId, String participantId, User host) {
+        GameSession session = findSession(sessionId);
+        requireHost(session, host);
+
+        Participant participant = participantRepository.findByParticipantId(participantId)
+                .orElseThrow(() -> new KnupException(ErrorCode.PARTICIPANT_NOT_FOUND));
+        if (!participant.getSession().getSessionId().equals(sessionId)) {
+            throw new KnupException(ErrorCode.PARTICIPANT_NOT_FOUND);
+        }
+
+        answerRepository.deleteByParticipant(participant);
+        participantRepository.delete(participant);
+        broadcastParticipants(session);
+    }
+
     // ── helpers ───────────────────────────────────────────────────
 
     private GameSession findSession(String sessionId) {
