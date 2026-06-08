@@ -3,6 +3,7 @@ package com.knupbackend.session.presentation;
 import com.knupbackend.global.auth.LoginUser;
 import com.knupbackend.session.dto.request.AnswerSubmitRequest;
 import com.knupbackend.session.dto.request.JoinSessionRequest;
+import com.knupbackend.session.dto.request.KickParticipantsRequest;
 import com.knupbackend.session.dto.request.SessionCreateRequest;
 import com.knupbackend.session.dto.response.*;
 import com.knupbackend.session.service.SessionService;
@@ -72,6 +73,15 @@ public class SessionController {
                                                 @PathVariable String participantId,
                                                 @LoginUser User host) {
         sessionService.removeParticipant(sessionId, participantId, host);
+        return ResponseEntity.ok().build();
+    }
+
+    /** 참가자 일괄/전체 강퇴 (호스트) — participantIds 가 비어 있으면 전체 */
+    @PostMapping("/{sessionId}/participants/kick")
+    public ResponseEntity<Void> kickParticipants(@PathVariable String sessionId,
+                                                 @RequestBody KickParticipantsRequest request,
+                                                 @LoginUser User host) {
+        sessionService.removeParticipants(sessionId, request.participantIds(), host);
         return ResponseEntity.ok().build();
     }
 }
