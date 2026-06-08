@@ -8,4 +8,5 @@ import java.util.List;
 public interface AnswerRepository extends JpaRepository<Answer, Long> {
     boolean existsByParticipantAndQuestion(Participant participant, Question question);
     List<Answer> findByParticipant_SessionAndQuestion(GameSession session, Question question);
+    void deleteByParticipant(Participant participant);
 }

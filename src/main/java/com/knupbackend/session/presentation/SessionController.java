@@ -65,4 +65,13 @@ public class SessionController {
                                                        @Valid @RequestBody AnswerSubmitRequest request) {
         return ResponseEntity.ok(sessionService.submitAnswer(sessionId, participantId, request));
     }
+
+    /** 참가자 강퇴 (호스트) */
+    @DeleteMapping("/{sessionId}/participants/{participantId}")
+    public ResponseEntity<Void> kickParticipant(@PathVariable String sessionId,
+                                                @PathVariable String participantId,
+                                                @LoginUser User host) {
+        sessionService.removeParticipant(sessionId, participantId, host);
+        return ResponseEntity.ok().build();
+    }
 }
