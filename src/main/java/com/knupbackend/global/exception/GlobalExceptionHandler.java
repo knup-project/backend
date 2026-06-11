@@ -32,6 +32,29 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(400, ErrorCode.INVALID_INPUT.name(), message, request.getRequestURI()));
     }
 
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUpload(HttpServletRequest request) {
+        return ResponseEntity
+                .status(ErrorCode.PDF_TOO_LARGE.getHttpStatus())
+                .body(ErrorResponse.of(ErrorCode.PDF_TOO_LARGE, request.getRequestURI()));
+    }
+
+    @ExceptionHandler(org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMediaType(org.springframework.web.HttpMediaTypeNotSupportedException e,
+                                                         HttpServletRequest request) {
+        log.warn("Unsupported media type: {} {}", request.getRequestURI(), e.getContentType());
+        return ResponseEntity.status(415)
+                .body(ErrorResponse.of(415, ErrorCode.INVALID_INPUT.name(),
+                        "지원하지 않는 요청 형식입니다.", request.getRequestURI()));
+    }
+
+    /** 존재하지 않는 정적 경로(주로 봇 스캔) — ERROR 스택트레이스 없이 404만 응답 */
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResource(HttpServletRequest request) {
+        return ResponseEntity.status(404)
+                .body(ErrorResponse.of(404, "NOT_FOUND", "요청한 리소스를 찾을 수 없습니다.", request.getRequestURI()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletRequest request) {
         log.error("Unexpected error", e);

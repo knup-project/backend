@@ -34,9 +34,21 @@ public class AiService {
 
     private static final String BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
 
+    /** Gemini inline_data 한계(요청 전체 ~20MB, base64 +33%)를 넘지 않는 실효 상한 */
+    private static final long MAX_PDF_BYTES = 15L * 1024 * 1024;
+
     private final QuestionRepository questionRepository;
     private final ObjectMapper objectMapper;
-    private final RestClient restClient = RestClient.create();
+    private final RestClient restClient = createRestClient();
+
+    /** FE가 먼저 포기해도 톰캣 스레드가 무기한 붙잡히지 않도록 연결/응답 타임아웃을 둔다. */
+    private static RestClient createRestClient() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory =
+                new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5_000);
+        factory.setReadTimeout(60_000);
+        return RestClient.builder().requestFactory(factory).build();
+    }
 
     @Value("${gemini.api-key:}")
     private String apiKey;
@@ -55,6 +67,9 @@ public class AiService {
                                                   String questionType, String difficulty) {
         if (file == null || file.isEmpty()) {
             throw new KnupException(ErrorCode.INVALID_INPUT);
+        }
+        if (file.getSize() > MAX_PDF_BYTES) {
+            throw new KnupException(ErrorCode.PDF_TOO_LARGE);
         }
         String base64;
         try {
@@ -77,7 +92,7 @@ public class AiService {
         String prompt = explainPrompt(q, request.participantAnswer());
         String json = callGemini(List.of(Map.of("text", prompt)));
         try {
-            JsonNode node = objectMapper.readTree(json);
+            JsonNode node = objectMapper.readTree(stripFences(json));
             return new AiExplainResponse(
                     node.path("explanation").asText(""),
                     node.hasNonNull("hint") ? node.path("hint").asText() : null,
@@ -126,7 +141,7 @@ public class AiService {
 
     private List<QuestionRequest> parseQuestions(String json) {
         try {
-            JsonNode root = objectMapper.readTree(json);
+            JsonNode root = objectMapper.readTree(stripFences(json));
             JsonNode arr = root.isArray() ? root : root.path("questions");
             List<QuestionRequest> out = new ArrayList<>();
             for (JsonNode n : arr) {
@@ -138,7 +153,7 @@ public class AiService {
                         n.path("content").asText(""),
                         parseType(n.path("type").asText("MULTIPLE_CHOICE")),
                         options,
-                        n.path("answer").asText(""),
+                        normalizeAnswer(n.path("answer").asText(""), options),
                         n.hasNonNull("explanation") ? n.path("explanation").asText() : null,
                         n.has("timeLimit") ? n.path("timeLimit").asInt(20) : 20,
                         n.has("points") ? n.path("points").asInt(100) : 100
@@ -154,6 +169,27 @@ public class AiService {
             log.warn("AI quiz parse failed: {}", e.getMessage());
             throw new KnupException(ErrorCode.AI_SERVICE_ERROR);
         }
+    }
+
+    /** 모델이 프롬프트를 어겨 ```json 펜스로 감싸 보낸 경우를 방어한다. */
+    private String stripFences(String s) {
+        String t = s == null ? "" : s.trim();
+        if (t.startsWith("```")) {
+            t = t.replaceFirst("^```[a-zA-Z]*\\s*", "").replaceFirst("\\s*```$", "").trim();
+        }
+        return t;
+    }
+
+    /** 정답이 옵션과 대소문자/공백만 다르면 옵션 표기로 맞춘다(프론트는 exact match로 정답 표시). */
+    private String normalizeAnswer(String answer, List<String> options) {
+        if (answer == null) return "";
+        String trimmed = answer.trim();
+        for (String opt : options) {
+            if (opt != null && opt.trim().equalsIgnoreCase(trimmed)) {
+                return opt;
+            }
+        }
+        return trimmed;
     }
 
     private QuestionType parseType(String s) {

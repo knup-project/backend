@@ -33,6 +33,7 @@ public enum ErrorCode {
     // ── AI ────────────────────────────────────────────────────────
     AI_SERVICE_ERROR(HttpStatus.BAD_GATEWAY, "AI 서비스 호출에 실패했습니다."),
     AI_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "AI 요청 한도를 초과했습니다."),
+    PDF_TOO_LARGE(HttpStatus.BAD_REQUEST, "PDF 파일이 너무 큽니다. 15MB 이하의 파일을 올려 주세요."),
 
     // ── Common ────────────────────────────────────────────────────
     INVALID_INPUT(HttpStatus.BAD_REQUEST, "유효하지 않은 요청입니다."),

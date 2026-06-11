@@ -11,8 +11,10 @@ import java.util.stream.Collectors;
 public record TeamLeaderboardResponse(List<TeamLeaderboardEntry> entries) {
 
     public static TeamLeaderboardResponse of(List<Participant> participants) {
+        // 과거 데이터 등으로 teamName 이 비어 있어도 NPE 없이 묶이도록 방어
         Map<String, List<Participant>> byTeam = participants.stream()
-                .collect(Collectors.groupingBy(Participant::getTeamName));
+                .collect(Collectors.groupingBy(p ->
+                        (p.getTeamName() == null || p.getTeamName().isBlank()) ? "미지정" : p.getTeamName()));
 
         AtomicInteger rank = new AtomicInteger(1);
         List<TeamLeaderboardEntry> entries = byTeam.entrySet().stream()

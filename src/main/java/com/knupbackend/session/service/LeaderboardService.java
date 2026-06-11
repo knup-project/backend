@@ -51,9 +51,8 @@ public class LeaderboardService {
 
         List<Participant> participants = participantRepository.findBySession(session);
 
-        // answerDistribution: 현재 문제 기준 선택지별 응답 수
-        Map<String, Integer> distribution = answerRepository.findAll().stream()
-                .filter(a -> a.getParticipant().getSession().getSessionId().equals(sessionId))
+        // answerDistribution: 세션 내 선택지별 응답 수
+        Map<String, Integer> distribution = answerRepository.findByParticipant_Session(session).stream()
                 .collect(Collectors.toMap(
                         Answer::getSelectedAnswer,
                         a -> 1,

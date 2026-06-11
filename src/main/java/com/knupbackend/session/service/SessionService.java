@@ -55,6 +55,7 @@ public class SessionService {
                 .pin(generatePin())
                 .quiz(quiz)
                 .mode(request.mode())
+                .teamCount(request.teamCount())
                 .maxParticipants(request.maxParticipants())
                 .build();
 
@@ -69,11 +70,32 @@ public class SessionService {
                 .map(p -> new SessionResponse.ParticipantSummary(
                         p.getParticipantId(), p.getNickname(), p.getTeamName()))
                 .toList();
+
+        // 송출 중인 문제 스냅샷 — WS 이벤트를 놓친 클라이언트의 복구용 (정답 미포함)
+        SessionResponse.CurrentQuestion currentQuestion = null;
+        Integer remainingSec = null;
+        List<Question> questions = session.getQuiz().getQuestions();
+        int idx = session.getCurrentQuestionIndex();
+        if (session.isInProgress() && session.currentQuestionServed() && idx < questions.size()) {
+            Question q = questions.get(idx);
+            int timeLimit = q.getTimeLimit() != null ? q.getTimeLimit() : DEFAULT_TIME_LIMIT;
+            currentQuestion = new SessionResponse.CurrentQuestion(
+                    q.getId(), q.getContent(), q.getQuestionType(), q.getOptions(),
+                    timeLimit,
+                    q.getPoints() != null ? q.getPoints() : DEFAULT_POINTS
+            );
+            long elapsedSec = java.time.Duration.between(
+                    session.getCurrentQuestionStartedAt(), java.time.LocalDateTime.now()).getSeconds();
+            remainingSec = (int) Math.max(0, timeLimit - elapsedSec);
+        }
+
         return SessionResponse.of(
                 session,
-                session.getQuiz().getQuestions().size(),
+                questions.size(),
                 participants.size(),
-                summaries
+                summaries,
+                currentQuestion,
+                remainingSec
         );
     }
 
@@ -150,13 +172,21 @@ public class SessionService {
             throw new KnupException(ErrorCode.NICKNAME_DUPLICATE);
         }
 
+        // TEAM 모드인데 팀이 지정되지 않으면 인원이 가장 적은 팀으로 자동 배정
+        // (null teamName 이 팀 리더보드 groupingBy 에서 NPE 를 일으키는 것도 함께 차단)
+        String teamName = request.teamId();
+        if (session.isTeamMode() && (teamName == null || teamName.isBlank())) {
+            teamName = assignTeam(session);
+        }
+
         Participant participant = Participant.builder()
                 .participantId(UUID.randomUUID().toString())
                 .session(session)
                 .nickname(request.nickname())
-                .teamName(request.teamId())
+                .teamName(teamName)
                 .build();
         participantRepository.save(participant);
+        session.touch();
 
         broadcastParticipants(session);
 
@@ -164,8 +194,31 @@ public class SessionService {
                 participant.getParticipantId(),
                 session.getSessionId(),
                 participant.getNickname(),
-                request.teamId()
+                teamName
         );
+    }
+
+    private static final int DEFAULT_TEAM_COUNT = 2;
+
+    /** "팀 1".."팀 N" 중 현재 인원이 가장 적은 팀을 고른다. */
+    private String assignTeam(GameSession session) {
+        int n = (session.getTeamCount() != null && session.getTeamCount() >= 2)
+                ? session.getTeamCount() : DEFAULT_TEAM_COUNT;
+        Map<String, Long> counts = participantRepository.findBySession(session).stream()
+                .filter(p -> p.getTeamName() != null)
+                .collect(Collectors.groupingBy(Participant::getTeamName, Collectors.counting()));
+
+        String best = "팀 1";
+        long bestCount = Long.MAX_VALUE;
+        for (int i = 1; i <= n; i++) {
+            String name = "팀 " + i;
+            long c = counts.getOrDefault(name, 0L);
+            if (c < bestCount) {
+                best = name;
+                bestCount = c;
+            }
+        }
+        return best;
     }
 
     @Transactional
@@ -192,13 +245,18 @@ public class SessionService {
         int awarded = scorePoints(correct, question, responseTime);
 
         participant.recordAnswer(correct, responseTime, awarded);
-        answerRepository.save(Answer.builder()
-                .participant(participant)
-                .question(question)
-                .selectedAnswer(request.answer())
-                .responseTimeSec(responseTime)
-                .correct(correct)
-                .build());
+        try {
+            // 유니크 제약(participant_id, question_id)으로 동시 중복 제출(TOCTOU) 차단
+            answerRepository.saveAndFlush(Answer.builder()
+                    .participant(participant)
+                    .question(question)
+                    .selectedAnswer(request.answer())
+                    .responseTimeSec(responseTime)
+                    .correct(correct)
+                    .build());
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            throw new KnupException(ErrorCode.ALREADY_SUBMITTED);
+        }
 
         List<Participant> sorted = participantRepository.findBySessionOrderByScoreDesc(session);
         int rank = rankOf(sorted, participant);
@@ -253,11 +311,16 @@ public class SessionService {
 
     // ── 유령 세션 자동 종료 (스케줄러에서 호출) ─────────────────────
 
-    /** 생성 후 3시간이 지난 미종료(WAITING/IN_PROGRESS) 세션을 자동 종료한다. */
+    /**
+     * 마지막 활동(참가/시작/문제 송출) 후 3시간이 지난 미종료 세션을 자동 종료한다.
+     * 생성 시각이 아니라 활동 시각 기준이므로, 길게 진행 중인 세션은 죽이지 않는다.
+     */
     @Transactional
     public void expireStaleSessions() {
         java.time.LocalDateTime cutoff = java.time.LocalDateTime.now().minusHours(3);
-        List<GameSession> stale = sessionRepository.findByStatusNotAndCreatedAtBefore(SessionStatus.FINISHED, cutoff);
+        List<GameSession> stale = sessionRepository.findByStatusNot(SessionStatus.FINISHED).stream()
+                .filter(s -> s.effectiveActivityAt().isBefore(cutoff))
+                .toList();
         for (GameSession s : stale) {
             s.end();
             broadcaster.status(new SessionStatusEvent(

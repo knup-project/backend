@@ -48,10 +48,16 @@ public class GameSession extends BaseEntity {
 
     private Integer maxParticipants;
 
+    /** TEAM 모드에서 자동 배정에 사용할 팀 수 (null 이면 기본값). */
+    private Integer teamCount;
+
     private LocalDateTime startedAt;
     private LocalDateTime endedAt;
     /** Set when the current question is broadcast; null until it is served. */
     private LocalDateTime currentQuestionStartedAt;
+
+    /** 마지막 호스트/참가자 활동 시각 — 유령 세션 정리 기준 (null 이면 createdAt 사용). */
+    private LocalDateTime lastActivityAt;
 
     public boolean isTeamMode() {
         return this.mode == SessionMode.TEAM;
@@ -82,10 +88,22 @@ public class GameSession extends BaseEntity {
         this.startedAt = LocalDateTime.now();
         this.currentQuestionIndex = 0;
         this.currentQuestionStartedAt = null;
+        touch();
     }
 
     public void serveCurrentQuestion() {
         this.currentQuestionStartedAt = LocalDateTime.now();
+        touch();
+    }
+
+    /** 활동 시각 갱신 (참가/시작/문제 송출 시 호출). */
+    public void touch() {
+        this.lastActivityAt = LocalDateTime.now();
+    }
+
+    /** 유령 세션 판정 기준 시각: 마지막 활동이 없으면 생성 시각. */
+    public LocalDateTime effectiveActivityAt() {
+        return lastActivityAt != null ? lastActivityAt : getCreatedAt();
     }
 
     public void advanceToNextQuestion() {
